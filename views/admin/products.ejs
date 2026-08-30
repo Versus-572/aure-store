@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// CATALOG</span>
+    <h1>PRODUCTS</h1>
+  </div>
+  <a href="/admin/products/new" class="btn btn-primary">+ ADD PRODUCT</a>
+</div>
+
+<div class="admin-block">
+  <table class="tbl">
+    <thead><tr><th>Image</th><th>Name</th><th>Line</th><th>Category</th><th>Price (INR)</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% if (products.length) { %>
+        <% products.forEach((p) => { %>
+          <tr>
+            <td>
+              <% if (p.image) { %><div class="tbl-img" style="background-image:url('<%= p.image %>')"></div><% } else { %><div class="tbl-img noimg"></div><% } %>
+            </td>
+            <td><b><%= p.name %></b><% if (p.tag) { %><span class="mini-tag"><%= p.tag %></span><% } %></td>
+            <td><span class="status <%= p.line === 'luxury' ? 'featured' : 'swline' %>"><%= p.line === 'luxury' ? 'LUXURY' : 'STREETWEAR' %></span></td>
+            <td><%= p.category %></td>
+            <td class="mono">₹<%= p.price.toLocaleString('en-IN') %></td>
+            <td class="mono"><%= p.stock %></td>
+            <td>
+              <span class="status <%= p.featured ? 'paiddlv' : 'pending' %>"><%= p.stock > 0 ? 'LIVE' : 'SOLD OUT' %></span>
+              <% if (p.featured) { %><span class="status featured">FEATURED</span><% } %>
+            </td>
+            <td class="row-actions">
+              <a class="btn btn-mini" href="/product/<%= p.id %>" target="_blank">VIEW</a>
+              <a class="btn btn-mini" href="/admin/products/<%= p.id %>/edit">EDIT</a>
+              <form method="POST" action="/admin/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?')">
+                <button class="btn btn-mini danger" type="submit">DEL</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="8" class="empty-note">No products yet. <a href="/admin/products/new">Add your first product →</a></td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

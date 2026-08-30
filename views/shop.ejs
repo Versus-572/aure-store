@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<%
+  const isLuxury = line === 'luxury';
+  const isStreet = line === 'streetwear';
+  const themeClass = isLuxury ? 'brand-luxury lux-shop' : isStreet ? 'brand-streetwear sw-shop' : '';
+%>
+
+<div class="page-head shop-head <%= themeClass %>">
+  <div class="page-side" aria-hidden="true">S H O P</div>
+  <div>
+    <span class="kicker <%= isLuxury ? 'kicker-lx' : isStreet ? 'kicker-sw' : '' %>">// CATALOG</span>
+    <h1 class="shop-title">
+      <% if (isLuxury) { %><span class="lx-serif">THE ATELIER</span><% } else if (isStreet) { %>THE <em>DROP</em> ROOM<% } else { %>THE <em>DROP</em> ROOM<% } %>
+    </h1>
+    <p><% if (isLuxury) { %>Runs of fifty. Quiet, gold-sealed luxury. When it's sold, it's gone.<% } else if (isStreet) { %>Loud fits. Limited pieces. When it's gone, it's gone.<% } else { %>Two lines, one label. Pick a world below.<% } %></p>
+  </div>
+</div>
+
+<div class="line-switch <%= themeClass %>">
+  <a href="/shop" class="ls-btn <%= !isLuxury && !isStreet ? 'on' : '' %>" data-line="all">ALL</a>
+  <a href="/shop?line=streetwear" class="ls-btn ls-sw <%= isStreet ? 'on' : '' %>" data-line="streetwear">STREETWEAR</a>
+  <a href="/shop?line=luxury" class="ls-btn ls-lx <%= isLuxury ? 'on' : '' %>" data-line="luxury">LUXURY</a>
+</div>
+
+<div class="shop-layout <%= themeClass %>">
+  <aside class="shop-filters">
+    <h4>FILTER</h4>
+    <a href="/shop<%= line !== 'all' ? '?line=' + line : '' %>" class="<%= category === '' ? 'on' : '' %>">ALL</a>
+    <% cats.forEach((c) => { %>
+      <a href="/shop?line=<%= line %>&category=<%= encodeURIComponent(c) %>" class="<%= category === c ? 'on' : '' %>"><%= c %></a>
+    <% }) %>
+    <div class="filter-note">PRICES IN INR</div>
+  </aside>
+
+  <div class="shop-grid">
+    <% if (products.length) { %>
+      <% products.forEach((p) => { %>
+        <a href="/product/<%= p.id %>" class="prod-card tilt-card reveal" data-stagger>
+          <div class="prod-img">
+            <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" /><% } else { %><div class="ph-box"></div><% } %>
+            <% if (p.tag) { %><span class="prod-tag"><%= p.tag %></span><% } %>
+            <% if (p.stock <= 0) { %><span class="prod-tag sold">SOLD OUT</span><% } %>
+          </div>
+          <div class="prod-meta">
+            <div>
+              <h3><%= p.name %></h3>
+              <span class="prod-cat"><%= p.line === 'luxury' ? 'MAISON · ' + p.category : p.category %></span>
+            </div>
+            <span class="prod-price">₹<%= p.price.toLocaleString('en-IN') %></span>
+          </div>
+        </a>
+      <% }) %>
+    <% } else { %>
+      <p class="empty-note">Nothing here yet. Drops coming soon. — <a href="/admin/products">Add products</a></p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

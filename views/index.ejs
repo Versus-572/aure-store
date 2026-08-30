@@ -1,0 +1,164 @@
+<%- include('partials/header') %>
+
+<% const heroImg = ads.length ? ads[0].image : null; %>
+
+<section class="hero">
+  <div class="hero-side" aria-hidden="true">// AURE — EST. 2026 — INDIA</div>
+  <div class="hero-core">
+    <div class="hero-tag"><span class="hr"></span> TWO WORLDS, ONE SIGNAL <b>—</b> EST. 2026</div>
+    <h1 class="hero-title">
+      <span class="line line-1">WEAR</span>
+      <span class="line line-2">THE</span>
+      <span class="line line-3">NOISE<span class="hero-ex">™</span></span>
+    </h1>
+    <p class="hero-sub">AURE is a dual-line label from India. On one side, loud streetwear that refuses to whisper. On the other, quiet luxury that never needs to shout.</p>
+    <div class="hero-cta">
+      <a href="/shop" class="btn btn-primary">SHOP THE DROP <span class="arr">→</span></a>
+      <a href="#worlds" class="btn btn-ghost">CHOOSE YOUR WORLD ↓</a>
+    </div>
+    <div class="hero-orbit" aria-hidden="true">
+      <div class="orbit-inner"></div>
+    </div>
+  </div>
+  <div class="hero-stage">
+    <% if (heroImg) { %>
+      <div class="tilt-card hero-card" data-parallax="14">
+        <img src="<%= heroImg %>" alt="<%= ads[0].title %>" />
+        <div class="hc-float">DROP • 01</div>
+        <div class="hc-float hc-float-2">EST. 2026</div>
+      </div>
+    <% } else { %>
+      <div class="tilt-card hero-card hero-card-plain">
+        <div class="plain-box"></div>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<div class="marquee"><div class="marquee-track">
+  <% for (let i = 0; i < 3; i++) { %>
+    <div class="mq-group">
+      <span>NEW DROP</span><b>✦</b><span>FREE SHIPPING OVER ₹1499</span><b>✦</b><span>UPI / CARDS</span><b>✦</b><span>STREETWEAR + LUXURY</span><b>✦</b>
+    </div>
+  <% } %>
+</div></div>
+
+<!-- ================= CHOOSE YOUR WORLD ================= -->
+<section class="worlds-section section" id="worlds">
+  <div class="section-head reveal">
+    <div>
+      <span class="kicker">// TWO LINES</span>
+      <h2>CHOOSE YOUR WORLD</h2>
+    </div>
+    <span class="section-link">PICK A SIDE ↓</span>
+  </div>
+  <div class="worlds">
+    <a href="/shop?line=streetwear" class="world world-streetwear reveal" data-stagger>
+      <div class="world-bg pan" style="background-image:url('<%= (banners[0] && banners[0].image) || (heroImg || '') %>')"></div>
+      <div class="world-shade"></div>
+      <div class="world-no" aria-hidden="true">01</div>
+      <div class="world-label">
+        <span class="kicker">THE PAVEMENT</span>
+        <h3>STREETWEAR</h3>
+        <p>Loud fits. Heavyweight fabric. Limited drops that sell out in hours.</p>
+        <span class="world-btn">ENTER <span class="arr">→</span></span>
+      </div>
+    </a>
+    <a href="/shop?line=luxury" class="world world-luxury reveal" data-stagger>
+      <div class="world-bg pan" style="background-image:url('<%= (banners.find((b) => /atelier/i.test(b.title)) || {}).image || '' %>')"></div>
+      <div class="world-shade"></div>
+      <div class="world-no" aria-hidden="true">02</div>
+      <div class="world-line" aria-hidden="true"></div>
+      <div class="world-label">
+        <span class="kicker">THE ATELIER</span>
+        <h3>LUXURY</h3>
+        <p>Runs of fifty. Silk, merino and quiet details that stay noticed.</p>
+        <span class="world-btn">ENTER <span class="arr">→</span></span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<% if (banners.length) { %>
+<section class="banner-row">
+  <% banners.slice(0, 3).forEach((b) => { %>
+    <a class="banner-card tilt-card reveal" href="<%= b.link ? (b.link.startsWith('/') ? b.link : '/product/' + b.link) : '/shop' %>">
+      <img src="<%= b.image %>" alt="<%= b.title %>" loading="lazy" />
+      <div class="banner-overlay">
+        <h3><%= b.title %></h3>
+        <% if (b.subtitle) { %><p><%= b.subtitle %></p><% } %>
+      </div>
+    </a>
+  <% }) %>
+</section>
+<% } %>
+
+<!-- ================= STREETWEAR — EYE-CATCHING ================= -->
+<section class="section brand-streetwear world-drop" id="drops">
+  <div class="section-head reveal">
+    <div>
+      <span class="kicker kicker-sw">// NOISE DIVISION</span>
+      <h2 class="sw-title">STREETWEAR <em>DROP</em><span class="ticker-tag">HOT</span></h2>
+    </div>
+    <a href="/shop?line=streetwear" class="section-link">SEE ALL STREETWEAR →</a>
+  </div>
+
+  <% if (streetwear.length) { %>
+    <div class="prod-grid">
+      <% streetwear.forEach((p) => { %>
+        <a href="/product/<%= p.id %>" class="prod-card tilt-card reveal" data-stagger>
+          <div class="prod-img">
+            <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" /><% } else { %><div class="ph-box"></div><% } %>
+            <% if (p.tag) { %><span class="prod-tag"><%= p.tag %></span><% } %>
+          </div>
+          <div class="prod-meta">
+            <div>
+              <h3><%= p.name %></h3>
+              <span class="prod-cat"><%= p.category %></span>
+            </div>
+            <span class="prod-price">₹<%= p.price.toLocaleString('en-IN') %></span>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="empty-note">No streetwear yet. Add some in the <a href="/admin/products">admin panel →</a></p>
+  <% } %>
+</section>
+
+<!-- ================= LUXURY — AESTHETIC ================= -->
+<section class="section brand-luxury world-edit">
+  <div class="lux-hero-ed reveal">
+    <div class="lux-col">
+      <span class="kicker kicker-lx">// MAISON DIVISION</span>
+      <h2 class="lx-title">THE <em class="lx-serif">Q</em>UIET<br /><em>LUXURY</em><sup>ÉD</sup></h2>
+      <p class="lx-sub">Hand-finished pieces sewn in limited runs. Gold-sealed at the atelier, priced in subtlety.</p>
+      <a href="/shop?line=luxury" class="btn btn-luxury">EXPLORE LUXURY <span class="arr">→</span></a>
+    </div>
+    <div class="lux-col lux-track">
+      <% if (luxury.length) { %>
+        <div class="lux-items">
+          <% luxury.forEach((p) => { %>
+            <a href="/product/<%= p.id %>" class="lux-item tilt-card reveal" data-stagger>
+              <div class="lx-img"><img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" /></div>
+              <div class="lx-info">
+                <span class="lx-num">№ <%=(p.category === 'Kimonos' ? 'XIX' : p.category === 'Accessories' ? 'PD' : 'ÉD')%></span>
+                <h4><%= p.name %></h4>
+                <span class="lx-price">₹<%= p.price.toLocaleString('en-IN') %></span>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="empty-note">No luxury pieces yet. Add some in the <a href="/admin/products">admin panel →</a></p>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>ONE LABEL.<br />TWO VOICES.</h2>
+  <a href="/shop" class="btn btn-primary btn-lg">SHOP BOTH WORLDS <span class="arr">→</span></a>
+</section>
+
+<%- include('partials/footer') %>

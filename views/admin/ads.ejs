@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// PROMOTION</span>
+    <h1>ADS & BANNERS</h1>
+  </div>
+  <a href="/admin/ads/new" class="btn btn-primary">+ ADD AD</a>
+</div>
+
+<div class="admin-grid-2">
+  <% if (ads.length) { %>
+    <% ads.forEach((a) => { %>
+      <div class="ad-card">
+        <div class="ad-preview">
+          <% if (a.image) { %><img src="<%= a.image %>" alt="" /><% } else { %><div class="ph-box"></div><% } %>
+          <span class="ad-badge <%= a.placement %>"><%= a.placement.toUpperCase() %></span>
+        </div>
+        <div class="ad-body">
+          <div class="ad-title">
+            <b><%= a.title %></b>
+            <span class="status <%= a.active ? 'paiddlv' : 'pending' %>"><%= a.active ? 'LIVE' : 'HIDDEN' %></span>
+          </div>
+          <p><%= a.subtitle || 'No subtitle' %></p>
+          <div class="row-actions">
+            <a class="btn btn-mini" href="/admin/ads/<%= a.id %>/edit">EDIT</a>
+            <form method="POST" action="/admin/ads/<%= a.id %>/delete" onsubmit="return confirm('Delete this ad?')">
+              <button class="btn btn-mini danger" type="submit">DEL</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p class="empty-note">No ads yet. Add a hero or banner ad — upload an image straight from your computer.</p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

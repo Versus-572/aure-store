@@ -1,0 +1,117 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// CATALOG</span>
+    <h1><%= product ? 'EDIT PRODUCT' : 'NEW PRODUCT' %></h1>
+  </div>
+  <a href="/admin/products" class="btn btn-ghost">← BACK</a>
+</div>
+
+<div class="form-layout">
+  <form method="POST" enctype="multipart/form-data" class="admin-form"
+        action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>">
+    <div class="f-field">
+      <label for="name">Product name *</label>
+      <input id="name" name="name" required value="<%= product ? product.name : '' %>" placeholder="AURE Heavyweight Hoodie" />
+    </div>
+
+    <div class="f-row">
+      <div class="f-field">
+        <label for="price">Price (INR) *</label>
+        <input id="price" name="price" required type="number" min="0" step="1" value="<%= product ? product.price : '' %>" placeholder="1999" />
+      </div>
+      <div class="f-field">
+        <label for="line">Brand line *</label>
+        <select id="line" name="line">
+          <option value="streetwear" <%= !product || product.line !== 'luxury' ? 'selected' : '' %>>STREETWEAR — noise division</option>
+          <option value="luxury" <%= product && product.line === 'luxury' ? 'selected' : '' %>>LUXURY — maison / atelier</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+          <% ['Tees', 'Hoodies', 'Jackets', 'Shirts', 'Knitwear', 'Kimonos', 'Accessories', 'Caps', 'Bottoms'].forEach((c) => { %>
+            <option value="<%= c %>" <%= product && product.category === c ? 'selected' : '' %>><%= c %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="f-row">
+      <div class="f-field">
+        <label for="stock">Stock count</label>
+        <input id="stock" name="stock" type="number" min="0" value="<%= product ? product.stock : 10 %>" />
+      </div>
+      <div class="f-field">
+        <label for="tag">Tag / badge (optional)</label>
+        <input id="tag" name="tag" value="<%= product ? product.tag : '' %>" placeholder="NEW / LIMITED" />
+      </div>
+    </div>
+
+    <div class="f-field">
+      <label>Sizes</label>
+      <div class="size-checks">
+        <% ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'].forEach((s) => { %>
+          <label class="chk-chip">
+            <input type="checkbox" name="sizes" value="<%= s %>" <%= product && product.sizes.includes(s) ? 'checked' : '' %> />
+            <span><%= s %></span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="f-field">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" placeholder="Heavyweight 380gsm cotton. Oversized fit. Made in India."><%= product ? product.description : '' %></textarea>
+    </div>
+
+    <div class="f-field">
+      <label>
+        <input type="checkbox" name="featured" <%= product && product.featured ? 'checked' : '' %> />
+        <span class="inline-lbl">Feature on homepage</span>
+      </label>
+    </div>
+
+    <div class="f-field">
+      <label>Product image — upload from computer</label>
+      <div class="upload-box">
+        <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+        <div class="upload-preview">
+          <% if (product && product.image) { %>
+            <img id="preview" src="<%= product.image %>" />
+          <% } else { %>
+            <div class="upload-ph" id="preview"></div>
+          <% } %>
+          <div class="upload-cta">CLICK TO CHOOSE<br /><small>JPG / PNG / WEBP — max 8 MB</small></div>
+        </div>
+      </div>
+      <% if (product && product.image) { %>
+        <label class="chk-chip remove-img">
+          <input type="checkbox" name="removeImage" value="1" />
+          <span>Remove current image</span>
+        </label>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">SAVE PRODUCT →</button>
+      <a href="/admin/products" class="btn btn-ghost">CANCEL</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const fileInput = document.getElementById('image');
+  const preview = document.getElementById('preview');
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const url = URL.createObjectURL(e.target.files[0]);
+      preview.onload = preview.onerror = null;
+      preview.src = url;
+      preview.classList.add('img-on');
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

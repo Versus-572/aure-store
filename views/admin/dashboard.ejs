@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// CONTROL ROOM</span>
+    <h1>DASHBOARD</h1>
+  </div>
+  <a href="/admin/products/new" class="btn btn-primary">+ NEW PRODUCT</a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <span>PRODUCTS</span>
+    <b><%= stats.products %></b>
+    <a href="/admin/products">manage →</a>
+  </div>
+  <div class="stat-card">
+    <span>ORDERS</span>
+    <b><%= stats.orders %></b>
+    <a href="/admin/orders">view →</a>
+  </div>
+  <div class="stat-card">
+    <span>PENDING</span>
+    <b><%= stats.pending %></b>
+    <a href="/admin/orders?status=pending">review →</a>
+  </div>
+  <div class="stat-card volt">
+    <span>REVENUE</span>
+    <b><%= stats.revenue %></b>
+    <a href="/admin/orders">all time →</a>
+  </div>
+</div>
+
+<div class="admin-block">
+  <div class="block-head">
+    <h3>RECENT ORDERS</h3>
+    <a href="/admin/orders">ALL →</a>
+  </div>
+  <% if (recentOrders.length) { %>
+    <table class="tbl">
+      <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>When</th></tr></thead>
+      <tbody>
+        <% recentOrders.forEach((o) => { %>
+          <tr>
+            <td><a class="mono" href="/admin/orders/<%= o.id %>"><%= o.id.toUpperCase() %></a></td>
+            <td><%= o.customer.name %></td>
+            <td class="mono"><%= inr(o.total) %></td>
+            <td class="mono"><%= o.razorpayPaymentId || '—' %></td>
+            <td><span class="status <%= o.status %>"><%= o.status.toUpperCase() %></span></td>
+            <td class="mono"><%= new Date(o.createdAt).toLocaleDateString('en-IN') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="empty-note">No orders yet. They'll show up here once checkout goes live.</p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

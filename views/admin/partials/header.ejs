@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sb-logo">AURE<span>.</span><em>ADMIN</em></div>
+    <nav class="sb-nav">
+      <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>" data-ico="◉">Dashboard</a>
+      <a href="/admin/products" class="<%= path.startsWith('/admin/products') ? 'on' : '' %>" data-ico="◆">Products</a>
+      <a href="/admin/ads" class="<%= path.startsWith('/admin/ads') ? 'on' : '' %>" data-ico="▣">Ads & Banners</a>
+      <a href="/admin/orders" class="<%= path.startsWith('/admin/orders') ? 'on' : '' %>" data-ico="▤">Orders</a>
+    </nav>
+    <div class="sb-foot">
+      <a href="/" target="_blank">View store ↗</a>
+      <form method="POST" action="/admin/logout">
+        <button class="logout" type="submit">Log out</button>
+      </form>
+    </div>
+  </aside>
+  <main class="admin-main">

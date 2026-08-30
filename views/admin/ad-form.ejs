@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// PROMOTION</span>
+    <h1><%= ad ? 'EDIT AD' : 'NEW AD' %></h1>
+  </div>
+  <a href="/admin/ads" class="btn btn-ghost">← BACK</a>
+</div>
+
+<div class="form-layout">
+  <form method="POST" enctype="multipart/form-data" class="admin-form"
+        action="<%= ad ? '/admin/ads/' + ad.id : '/admin/ads' %>">
+    <div class="f-field">
+      <label for="title">Title *</label>
+      <input id="title" name="title" required value="<%= ad ? ad.title : '' %>" placeholder="SUMMER DROP '26" />
+    </div>
+
+    <div class="f-field">
+      <label for="subtitle">Subtitle (optional)</label>
+      <input id="subtitle" name="subtitle" value="<%= ad ? ad.subtitle : '' %>" placeholder="Heavyweight tees, now live" />
+    </div>
+
+    <div class="f-row">
+      <div class="f-field">
+        <label for="placement">Placement</label>
+        <select id="placement" name="placement">
+          <option value="hero" <%= ad && ad.placement === 'hero' ? 'selected' : '' %>>Hero (homepage main)</option>
+          <option value="banner" <%= ad && ad.placement === 'banner' ? 'selected' : '' %>>Banner strip</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="order">Order (0 = first)</label>
+        <input id="order" name="order" type="number" value="<%= ad ? ad.order : 0 %>" />
+      </div>
+    </div>
+
+    <div class="f-field">
+      <label for="link">Link to product (paste product ID) or full URL</label>
+      <input id="link" name="link" value="<%= ad ? ad.link : '' %>" placeholder="Optional — leave blank to link to shop" />
+    </div>
+
+    <div class="f-field">
+      <label>
+        <input type="checkbox" name="active" <%= !ad || ad.active ? 'checked' : '' %> />
+        <span class="inline-lbl">Active (shown on site)</span>
+      </label>
+    </div>
+
+    <div class="f-field">
+      <label>Ad image — upload from computer</label>
+      <div class="upload-box">
+        <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+        <div class="upload-preview">
+          <% if (ad && ad.image) { %>
+            <img id="preview" src="<%= ad.image %>" />
+          <% } else { %>
+            <div class="upload-ph" id="preview"></div>
+          <% } %>
+          <div class="upload-cta">CLICK TO CHOOSE<br /><small>JPG / PNG / WEBP — max 8 MB</small></div>
+        </div>
+      </div>
+      <% if (ad && ad.image) { %>
+        <label class="chk-chip remove-img">
+          <input type="checkbox" name="removeImage" value="1" />
+          <span>Remove current image</span>
+        </label>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">SAVE AD →</button>
+      <a href="/admin/ads" class="btn btn-ghost">CANCEL</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const fileInput = document.getElementById('image');
+  const preview = document.getElementById('preview');
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const url = URL.createObjectURL(e.target.files[0]);
+      preview.src = url;
+      preview.classList.add('img-on');
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

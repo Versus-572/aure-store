@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// ORDER DETAIL</span>
+    <h1 class="mono"><%= order.id.toUpperCase() %></h1>
+  </div>
+  <a href="/admin/orders" class="btn btn-ghost">← BACK</a>
+</div>
+
+<div class="admin-grid-2">
+  <div class="admin-block">
+    <h3 class="block-head">ORDER ITEMS</h3>
+    <% order.items.forEach((i) => { %>
+      <div class="rec-item od-item">
+        <div>
+          <b><%= i.product %></b>
+          <small>Size <%= i.size %> × <%= i.qty %> <span class="mono muted">[<%= i.productId %>]</span></small>
+        </div>
+        <span>₹<%= (i.price * i.qty).toLocaleString('en-IN') %></span>
+      </div>
+    <% }) %>
+    <div class="cs-line"><span>Subtotal</span><span>₹<%= order.subtotal.toLocaleString('en-IN') %></span></div>
+    <div class="cs-line"><span>Shipping</span><span><%= order.shipping === 0 ? 'FREE' : '₹' + order.shipping %></span></div>
+    <div class="cs-total"><span>TOTAL</span><span class="mono"><%= inr(order.total) %></span></div>
+  </div>
+
+  <div class="admin-block">
+    <h3 class="block-head">CUSTOMER</h3>
+    <p><b><%= order.customer.name %></b><br />
+    <%= order.customer.email %><br />
+    <%= order.customer.phone %><br />
+    <%= order.customer.address %>, <%= order.customer.city %> — <%= order.customer.pincode %></p>
+
+    <h3 class="block-head">PAYMENT</h3>
+    <p class="mono">Method: <%= order.paymentMethod %><br />
+    RZP order: <%= order.razorpayOrderId || '—' %><br />
+    RZP payment: <%= order.razorpayPaymentId || '—' %></p>
+
+    <h3 class="block-head">UPDATE STATUS</h3>
+    <form method="POST" action="/admin/orders/<%= order.id %>/status" class="status-form">
+      <select name="status">
+        <% ['pending', 'paid', 'shipped', 'delivered', 'cancelled'].forEach((s) => { %>
+          <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s.toUpperCase() %></option>
+        <% }) %>
+      </select>
+      <button class="btn btn-primary" type="submit">UPDATE</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

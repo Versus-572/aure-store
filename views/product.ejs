@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<div class="product-wrap <%= product.line === 'luxury' ? 'brand-luxury' : 'brand-streetwear' %>">
+  <div class="p-gallery">
+    <div class="tilt-card p-main">
+      <% if (product.image) { %><img src="<%= product.image %>" alt="<%= product.name %>" /><% } else { %><div class="ph-box"></div><% } %>
+      <% if (product.tag) { %><span class="prod-tag"><%= product.tag %></span><% } %>
+    </div>
+  </div>
+
+  <div class="p-info">
+    <div class="p-side" aria-hidden="true"><%= product.line === 'luxury' ? 'A T E L I E R' : 'A U R E' %></div>
+    <span class="p-line-badge <%= product.line === 'luxury' ? 'badge-lx' : 'badge-sw' %>"><%= product.line === 'luxury' ? '✦ MAISON' : 'NOISE DIVISION' %></span>
+    <span class="kicker">// <%= product.category %></span>
+    <h1><%= product.name %></h1>
+    <div class="p-price">₹<%= product.price.toLocaleString('en-IN') %>
+      <span class="p-tagline">INCL. GST • INDIA</span>
+    </div>
+    <p class="p-desc"><%= product.description %></p>
+
+    <div class="p-stock <%= product.stock > 0 ? 'in' : 'out' %>">
+      <% if (product.stock > 0) { %>● <%= product.stock %> IN STOCK<% } else { %>● SOLD OUT<% } %>
+    </div>
+
+    <div class="p-sizes">
+      <div class="lbl">SIZE</div>
+      <div class="sizes">
+        <% (product.sizes.length ? product.sizes : ['One Size']).forEach((s) => { %>
+          <button class="size-btn <%= product.sizes.length ? '' : 'sel' %>" data-size="<%= s %>"><%= s %></button>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="p-qty">
+      <label class="lbl">QTY</label>
+      <div class="qty-box">
+        <button id="q-minus">−</button>
+        <span id="q-val">1</span>
+        <button id="q-plus">+</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-lg btn-block" id="add-to-cart" <%= product.stock <= 0 ? 'disabled' : '' %>
+      data-id="<%= product.id %>">
+      <% if (product.stock > 0) { %>ADD TO CART <% } else { %>SOLD OUT <% } %>→
+    </button>
+
+    <a href="/checkout" class="btn btn-ghost btn-block">GO TO CHECKOUT →</a>
+
+    <div class="p-meta">
+      <div class="p-meta-line"><span>CODE</span><span><%= product.id.toUpperCase() %></span></div>
+      <div class="p-meta-line"><span>SHIPPING</span><span>FREE OVER ₹1499</span></div>
+      <div class="p-meta-line"><span>PAYMENTS</span><span>UPI • CARDS • NETBANKING</span></div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

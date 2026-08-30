@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="success-wrap">
+  <div class="success-3d" aria-hidden="true">
+    <div class="ok-ring"><span>✓</span></div>
+  </div>
+  <span class="kicker">// ORDER CONFIRMED</span>
+  <h1>LOCKED <em>IN.</em></h1>
+  <p class="success-sub">Payment <%= order.status === 'paid' ? 'received' : 'processing' %>. Your drop is on the way.</p>
+
+  <div class="receipt">
+    <div class="rec-head">
+      <span>AURE — RECEIPT</span>
+      <span><%= order.id.toUpperCase() %></span>
+    </div>
+    <div class="rec-row"><span>Name</span><span><%= order.customer.name %></span></div>
+    <div class="rec-row"><span>Phone</span><span><%= order.customer.phone %></span></div>
+    <div class="rec-row"><span>Address</span><span><%= order.customer.address %>, <%= order.customer.city %> — <%= order.customer.pincode %></span></div>
+    <div class="rec-row"><span>Payment</span><span><%= order.paymentMethod %><%= order.razorpayPaymentId ? ' • ' + order.razorpayPaymentId : '' %></span></div>
+    <% order.items.forEach((i) => { %>
+      <div class="rec-item">
+        <div>
+          <b><%= i.product %></b>
+          <small>Size <%= i.size %> × <%= i.qty %></small>
+        </div>
+        <span>₹<%= (i.price * i.qty).toLocaleString('en-IN') %></span>
+      </div>
+    <% }) %>
+    <div class="rec-row rec-total"><span>TOTAL</span><span><%= inr(order.total) %></span></div>
+  </div>
+
+  <a href="/shop" class="btn btn-primary btn-lg">KEEP SHOPPING →</a>
+</div>
+
+<%- include('partials/footer') %>

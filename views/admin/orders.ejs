@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// SALES</span>
+    <h1>ORDERS</h1>
+  </div>
+  <div class="status-filters">
+    <a href="/admin/orders" class="<%= !status ? 'on' : '' %>">ALL</a>
+    <a href="/admin/orders?status=pending" class="<%= status === 'pending' ? 'on' : '' %>">PENDING</a>
+    <a href="/admin/orders?status=paid" class="<%= status === 'paid' ? 'on' : '' %>">PAID</a>
+    <a href="/admin/orders?status=shipped" class="<%= status === 'shipped' ? 'on' : '' %>">SHIPPED</a>
+    <a href="/admin/orders?status=delivered" class="<%= status === 'delivered' ? 'on' : '' %>">DELIVERED</a>
+  </div>
+</div>
+
+<div class="admin-block">
+  <% if (orders.length) { %>
+    <table class="tbl">
+      <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>When</th><th></th></tr></thead>
+      <tbody>
+        <% orders.forEach((o) => { %>
+          <tr>
+            <td><a class="mono" href="/admin/orders/<%= o.id %>"><%= o.id.toUpperCase() %></a></td>
+            <td><%= o.customer.name %><br /><small class="muted"><%= o.customer.phone %></small></td>
+            <td class="mono"><%= o.items.reduce((s, i) => s + i.qty, 0) %></td>
+            <td class="mono">₹<%= o.total.toLocaleString('en-IN') %></td>
+            <td class="mono"><%= o.razorpayPaymentId ? o.razorpayPaymentId.slice(0, 14) + '…' : (o.paymentMethod || '—') %></td>
+            <td><span class="status <%= o.status %>"><%= o.status.toUpperCase() %></span></td>
+            <td class="mono"><%= new Date(o.createdAt).toLocaleDateString('en-IN') %></td>
+            <td class="row-actions"><a class="btn btn-mini" href="/admin/orders/<%= o.id %>">OPEN</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="empty-note">No orders in this view.</p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
