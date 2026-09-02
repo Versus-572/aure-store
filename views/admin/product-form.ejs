@@ -104,6 +104,8 @@
 <script>
   const fileInput = document.getElementById('image');
   const preview = document.getElementById('preview');
+  const uploadBox = document.querySelector('.upload-box');
+  uploadBox.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
       const url = URL.createObjectURL(e.target.files[0]);
