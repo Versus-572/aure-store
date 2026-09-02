@@ -49,8 +49,8 @@
 
     <div class="f-field">
       <label>Ad image — upload from computer</label>
-      <div class="upload-box">
-        <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+      <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+      <label for="image" class="upload-box">
         <div class="upload-preview">
           <% if (ad && ad.image) { %>
             <img id="preview" src="<%= ad.image %>" />
@@ -59,7 +59,7 @@
           <% } %>
           <div class="upload-cta">CLICK TO CHOOSE<br /><small>JPG / PNG / WEBP — max 8 MB</small></div>
         </div>
-      </div>
+      </label>
       <% if (ad && ad.image) { %>
         <label class="chk-chip remove-img">
           <input type="checkbox" name="removeImage" value="1" />
@@ -78,8 +78,6 @@
 <script>
   const fileInput = document.getElementById('image');
   const preview = document.getElementById('preview');
-  const uploadBox = document.querySelector('.upload-box');
-  uploadBox.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
       const url = URL.createObjectURL(e.target.files[0]);
