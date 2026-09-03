@@ -177,7 +177,7 @@ h3.block-head { font-weight: 600; font-size: 12px; }
 /* upload */
 .upload-box { display: flex; align-items: center; gap: 16px; border: 1px dashed var(--line); border-radius: 14px; padding: 16px; background: var(--bg2); transition: border-color .2s; }
 .upload-box:hover { border-color: var(--volt); }
-.file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-input { position: absolute; left: -9999px; }
 .upload-preview { display: flex; align-items: center; gap: 16px; width: 100%; cursor: pointer; }
 .upload-ph {
   width: 96px; height: 120px; border-radius: 10px; flex-shrink: 0;

@@ -75,8 +75,8 @@
 
     <div class="f-field">
       <label>Product image — upload from computer</label>
-      <input type="file" name="image" id="image" accept="image/*" class="file-input" />
       <label for="image" class="upload-box">
+        <input type="file" name="image" id="image" accept="image/*" class="file-input" />
         <div class="upload-preview">
           <% if (product && product.image) { %>
             <img id="preview" src="<%= product.image %>" />
