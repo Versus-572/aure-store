@@ -75,8 +75,8 @@
 
     <div class="f-field">
       <label>Product image — upload from computer</label>
-      <label for="image" class="upload-box">
-        <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+      <input type="file" name="image" id="image" accept="image/*" class="file-input" />
+      <div class="upload-box" onclick="document.getElementById('image').click()">
         <div class="upload-preview">
           <% if (product && product.image) { %>
             <img id="preview" src="<%= product.image %>" />
@@ -85,7 +85,7 @@
           <% } %>
           <div class="upload-cta">CLICK TO CHOOSE<br /><small>JPG / PNG / WEBP — max 8 MB</small></div>
         </div>
-      </label>
+      </div>
       <% if (product && product.image) { %>
         <label class="chk-chip remove-img">
           <input type="checkbox" name="removeImage" value="1" />
