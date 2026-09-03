@@ -74,24 +74,18 @@
     </div>
 
     <div class="f-field">
-      <label>Product image — upload from computer</label>
-      <input type="file" name="image" id="image" accept="image/*" class="file-input" />
-      <div class="upload-box" onclick="document.getElementById('image').click()">
-        <div class="upload-preview">
-          <% if (product && product.image) { %>
-            <img id="preview" src="<%= product.image %>" />
-          <% } else { %>
-            <div class="upload-ph" id="preview"></div>
-          <% } %>
-          <div class="upload-cta">CLICK TO CHOOSE<br /><small>JPG / PNG / WEBP — max 8 MB</small></div>
-        </div>
-      </div>
+      <label for="imageUrl">Image URL (paste a link to an image)</label>
+      <input id="imageUrl" name="imageUrl" value="<%= product ? product.image : '' %>" placeholder="https://example.com/photo.jpg" />
       <% if (product && product.image) { %>
-        <label class="chk-chip remove-img">
-          <input type="checkbox" name="removeImage" value="1" />
-          <span>Remove current image</span>
-        </label>
+        <div style="margin-top:10px">
+          <img src="<%= product.image %>" style="max-width:200px;border-radius:10px;border:1px solid var(--line)" />
+        </div>
       <% } %>
+    </div>
+
+    <div class="f-field">
+      <label>Or upload from computer</label>
+      <input type="file" name="image" id="image" accept="image/*" style="padding:12px;border:1px dashed var(--line);border-radius:10px;background:var(--bg2);width:100%;color:var(--ink);font-family:var(--mono);font-size:13px;" />
     </div>
 
     <div class="form-actions">

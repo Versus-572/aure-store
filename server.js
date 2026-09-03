@@ -319,14 +319,22 @@ app.get('/admin/products/:id/edit', requireAdmin, (req, res) => {
 
 app.post('/admin/products', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
-  if (req.file) data.image = '/uploads/' + req.file.filename;
+  if (req.file) {
+    data.image = '/uploads/' + req.file.filename;
+  } else if (data.imageUrl && data.imageUrl.trim()) {
+    data.image = data.imageUrl.trim();
+  }
   const product = store.addProduct(normalizeProductBody(data));
   res.redirect('/admin/products');
 });
 
 app.post('/admin/products/:id', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
-  if (req.file) data.image = '/uploads/' + req.file.filename;
+  if (req.file) {
+    data.image = '/uploads/' + req.file.filename;
+  } else if (data.imageUrl && data.imageUrl.trim()) {
+    data.image = data.imageUrl.trim();
+  }
   if (req.body.removeImage === '1') data.image = '';
   store.updateProduct(req.params.id, normalizeProductBody(data));
   res.redirect('/admin/products');
@@ -384,14 +392,22 @@ app.get('/admin/ads/:id/edit', requireAdmin, (req, res) => {
 
 app.post('/admin/ads', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
-  if (req.file) data.image = '/uploads/' + req.file.filename;
+  if (req.file) {
+    data.image = '/uploads/' + req.file.filename;
+  } else if (data.imageUrl && data.imageUrl.trim()) {
+    data.image = data.imageUrl.trim();
+  }
   store.addAd(data);
   res.redirect('/admin/ads');
 });
 
 app.post('/admin/ads/:id', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
-  if (req.file) data.image = '/uploads/' + req.file.filename;
+  if (req.file) {
+    data.image = '/uploads/' + req.file.filename;
+  } else if (data.imageUrl && data.imageUrl.trim()) {
+    data.image = data.imageUrl.trim();
+  }
   if (req.body.removeImage === '1') data.image = '';
   store.updateAd(req.params.id, data);
   res.redirect('/admin/ads');
