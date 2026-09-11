@@ -46,20 +46,13 @@ app.use(
 /* ---------------- Uploads ---------------- */
 const fs = require('fs');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'public', 'uploads')),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    cb(null, Date.now() + '_' + Math.random().toString(36).slice(2, 8) + ext);
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype && file.mimetype.startsWith('image/')) return cb(null, true);
-    cb(new Error('Only image files are allowed'));
+    const ok = file.mimetype && (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/'));
+    cb(ok ? null : new Error('Only image and video files allowed'), ok);
   }
 });
 
@@ -270,13 +263,18 @@ app.get('/order/success/:id', (req, res) => {
 });
 
 /* ============================================================
-   CLOUDINARY UPLOAD SIGNATURE
+   CLOUDINARY UPLOAD (server-side, no widget needed)
 ============================================================ */
-app.get('/admin/upload-signature', requireAdmin, (req, res) => {
-  const timestamp = Math.round(Date.now() / 1000);
-  const params = { timestamp, folder: 'aure-store' };
-  const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
-  res.json({ timestamp, signature, cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY });
+app.post('/admin/upload', requireAdmin, upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const b64 = req.file.buffer.toString('base64');
+  const dataUri = 'data:' + req.file.mimetype + ';base64,' + b64;
+  const isVideo = req.file.mimetype.startsWith('video/');
+  const folder = isVideo ? 'aure-store/videos' : 'aure-store';
+  cloudinary.uploader.upload(dataUri, { folder, resource_type: isVideo ? 'video' : 'image' }, (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ url: result.secure_url });
+  });
 });
 
 /* ============================================================
@@ -334,28 +332,16 @@ app.get('/admin/products/:id/edit', requireAdmin, (req, res) => {
   res.render('admin/product-form', { title: 'Edit Product — AURE Admin', product });
 });
 
-app.post('/admin/products', requireAdmin, upload.single('image'), (req, res) => {
+app.post('/admin/products', requireAdmin, (req, res) => {
   const data = req.body;
-  if (req.file) {
-    data.image = '/uploads/' + req.file.filename;
-  } else if (data.mediaUrl && data.mediaUrl.trim()) {
-    data.image = data.mediaUrl.trim();
-  } else if (data.imageUrl && data.imageUrl.trim()) {
-    data.image = data.imageUrl.trim();
-  }
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
   const product = store.addProduct(normalizeProductBody(data));
   res.redirect('/admin/products');
 });
 
-app.post('/admin/products/:id', requireAdmin, upload.single('image'), (req, res) => {
+app.post('/admin/products/:id', requireAdmin, (req, res) => {
   const data = req.body;
-  if (req.file) {
-    data.image = '/uploads/' + req.file.filename;
-  } else if (data.mediaUrl && data.mediaUrl.trim()) {
-    data.image = data.mediaUrl.trim();
-  } else if (data.imageUrl && data.imageUrl.trim()) {
-    data.image = data.imageUrl.trim();
-  }
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
   if (req.body.removeImage === '1') data.image = '';
   store.updateProduct(req.params.id, normalizeProductBody(data));
   res.redirect('/admin/products');
@@ -411,28 +397,16 @@ app.get('/admin/ads/:id/edit', requireAdmin, (req, res) => {
   res.render('admin/ad-form', { title: 'Edit Ad — AURE Admin', ad });
 });
 
-app.post('/admin/ads', requireAdmin, upload.single('image'), (req, res) => {
+app.post('/admin/ads', requireAdmin, (req, res) => {
   const data = req.body;
-  if (req.file) {
-    data.image = '/uploads/' + req.file.filename;
-  } else if (data.mediaUrl && data.mediaUrl.trim()) {
-    data.image = data.mediaUrl.trim();
-  } else if (data.imageUrl && data.imageUrl.trim()) {
-    data.image = data.imageUrl.trim();
-  }
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
   store.addAd(data);
   res.redirect('/admin/ads');
 });
 
-app.post('/admin/ads/:id', requireAdmin, upload.single('image'), (req, res) => {
+app.post('/admin/ads/:id', requireAdmin, (req, res) => {
   const data = req.body;
-  if (req.file) {
-    data.image = '/uploads/' + req.file.filename;
-  } else if (data.mediaUrl && data.mediaUrl.trim()) {
-    data.image = data.mediaUrl.trim();
-  } else if (data.imageUrl && data.imageUrl.trim()) {
-    data.image = data.imageUrl.trim();
-  }
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
   if (req.body.removeImage === '1') data.image = '';
   store.updateAd(req.params.id, data);
   res.redirect('/admin/ads');

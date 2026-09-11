@@ -76,22 +76,29 @@
     <div class="f-field">
       <label>Product Image / Video</label>
       <input type="hidden" id="mediaUrl" name="mediaUrl" value="<%= product ? product.image : '' %>" />
+
       <div id="media-preview" style="margin-bottom:12px">
         <% if (product && product.image) { %>
-          <% if (product.image.endsWith('.mp4') || product.image.endsWith('.webm')) { %>
+          <% if (/\.(mp4|webm|ogg)$/i.test(product.image)) { %>
             <video src="<%= product.image %>" controls style="max-width:300px;border-radius:10px;border:1px solid var(--line)"></video>
           <% } else { %>
             <img src="<%= product.image %>" style="max-width:300px;border-radius:10px;border:1px solid var(--line)" />
           <% } %>
         <% } %>
       </div>
-      <button type="button" id="upload-btn" class="btn btn-primary" style="margin-bottom:8px">UPLOAD IMAGE / VIDEO</button>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px">DRAG & DROP OR CLICK — JPG, PNG, WEBP, MP4 — MAX 10 MB</div>
+
+      <label for="fileUpload" class="btn btn-primary" style="cursor:pointer;display:inline-block;margin-bottom:8px">UPLOAD IMAGE / VIDEO</label>
+      <input type="file" id="fileUpload" accept="image/*,video/mp4,video/webm" style="display:none" />
+
+      <div id="uploadStatus" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px;display:none"></div>
     </div>
 
     <div class="f-field">
       <label for="imageUrl">Or paste an image URL</label>
       <input id="imageUrl" name="imageUrl" value="" placeholder="https://example.com/photo.jpg" />
+      <div style="margin-top:8px">
+        <button type="button" id="useUrlBtn" class="btn btn-ghost" style="font-size:12px">USE THIS URL →</button>
+      </div>
     </div>
 
     <div class="form-actions">
@@ -101,35 +108,46 @@
   </form>
 </div>
 
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 <script>
-  document.getElementById('upload-btn').addEventListener('click', function() {
-    fetch('/admin/upload-signature')
-      .then(r => r.json())
-      .then(sig => {
-        cloudinary.openUploadWidget({
-          cloud_name: sig.cloud_name,
-          api_key: sig.api_key,
-          upload_signature: sig.signature,
-          upload_signature_timestamp: sig.timestamp,
-          folder: 'aure-store',
-          max_files: 1,
-          sources: ['local', 'url', 'camera'],
-          styles: { palette: { window: '#141416', windowBorder: '#26262b', tabIcon: '#d6ff3f', menuIcons: '#8a8a93', textDark: '#ededee', textLight: '#ffffff', link: '#d6ff3f', inactiveTabIcon: '#8a8a93', error: '#ff4d2e', inProgress: '#d6ff3f', complete: '#7ee08a', default: '#8a8a93' } }
-        }, function(error, result) {
-          if (!error && result && result.event === 'success') {
-            var url = result.info.secure_url;
-            var isVideo = url.match(/\.(mp4|webm|ogg)$/i) || result.info.resource_type === 'video';
-            document.getElementById('mediaUrl').value = url;
-            var preview = document.getElementById('media-preview');
-            if (isVideo) {
-              preview.innerHTML = '<video src="' + url + '" controls style="max-width:300px;border-radius:10px;border:1px solid var(--line)"></video>';
-            } else {
-              preview.innerHTML = '<img src="' + url + '" style="max-width:300px;border-radius:10px;border:1px solid var(--line)" />';
-            }
-          }
-        });
-      });
+  var fileInput = document.getElementById('fileUpload');
+  var mediaUrl = document.getElementById('mediaUrl');
+  var preview = document.getElementById('media-preview');
+  var status = document.getElementById('uploadStatus');
+
+  fileInput.addEventListener('change', function() {
+    if (!fileInput.files || !fileInput.files[0]) return;
+    var fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+    status.style.display = 'block';
+    status.style.color = 'var(--muted)';
+    status.textContent = 'Uploading to Cloudinary...';
+    fetch('/admin/upload', { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.error) { status.style.color = 'red'; status.textContent = 'Error: ' + d.error; return; }
+        mediaUrl.value = d.url;
+        var isVideo = /\.(mp4|webm|ogg)$/i.test(d.url);
+        if (isVideo) {
+          preview.innerHTML = '<video src="' + d.url + '" controls style="max-width:300px;border-radius:10px;border:1px solid var(--line)"></video>';
+        } else {
+          preview.innerHTML = '<img src="' + d.url + '" style="max-width:300px;border-radius:10px;border:1px solid var(--line)" />';
+        }
+        status.style.color = '#7ee08a';
+        status.textContent = 'Uploaded!';
+      })
+      .catch(function(e) { status.style.color = 'red'; status.textContent = 'Upload failed: ' + e.message; });
+  });
+
+  document.getElementById('useUrlBtn').addEventListener('click', function() {
+    var url = document.getElementById('imageUrl').value.trim();
+    if (!url) return alert('Paste a URL first');
+    mediaUrl.value = url;
+    var isVideo = /\.(mp4|webm|ogg)$/i.test(url);
+    if (isVideo) {
+      preview.innerHTML = '<video src="' + url + '" controls style="max-width:300px;border-radius:10px;border:1px solid var(--line)"></video>';
+    } else {
+      preview.innerHTML = '<img src="' + url + '" style="max-width:300px;border-radius:10px;border:1px solid var(--line)" />';
+    }
   });
 </script>
 
