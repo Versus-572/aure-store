@@ -4,7 +4,14 @@ const express = require('express');
 const session = require('express-session');
 const multer = require('multer');
 const Razorpay = require('razorpay');
+const cloudinary = require('cloudinary').v2;
 const store = require('./lib/store');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -263,6 +270,16 @@ app.get('/order/success/:id', (req, res) => {
 });
 
 /* ============================================================
+   CLOUDINARY UPLOAD SIGNATURE
+============================================================ */
+app.get('/admin/upload-signature', requireAdmin, (req, res) => {
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = { timestamp, folder: 'aure-store' };
+  const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
+  res.json({ timestamp, signature, cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY });
+});
+
+/* ============================================================
    ADMIN ROUTES
 ============================================================ */
 
@@ -321,6 +338,8 @@ app.post('/admin/products', requireAdmin, upload.single('image'), (req, res) => 
   const data = req.body;
   if (req.file) {
     data.image = '/uploads/' + req.file.filename;
+  } else if (data.mediaUrl && data.mediaUrl.trim()) {
+    data.image = data.mediaUrl.trim();
   } else if (data.imageUrl && data.imageUrl.trim()) {
     data.image = data.imageUrl.trim();
   }
@@ -332,6 +351,8 @@ app.post('/admin/products/:id', requireAdmin, upload.single('image'), (req, res)
   const data = req.body;
   if (req.file) {
     data.image = '/uploads/' + req.file.filename;
+  } else if (data.mediaUrl && data.mediaUrl.trim()) {
+    data.image = data.mediaUrl.trim();
   } else if (data.imageUrl && data.imageUrl.trim()) {
     data.image = data.imageUrl.trim();
   }
@@ -394,6 +415,8 @@ app.post('/admin/ads', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
   if (req.file) {
     data.image = '/uploads/' + req.file.filename;
+  } else if (data.mediaUrl && data.mediaUrl.trim()) {
+    data.image = data.mediaUrl.trim();
   } else if (data.imageUrl && data.imageUrl.trim()) {
     data.image = data.imageUrl.trim();
   }
@@ -405,6 +428,8 @@ app.post('/admin/ads/:id', requireAdmin, upload.single('image'), (req, res) => {
   const data = req.body;
   if (req.file) {
     data.image = '/uploads/' + req.file.filename;
+  } else if (data.mediaUrl && data.mediaUrl.trim()) {
+    data.image = data.mediaUrl.trim();
   } else if (data.imageUrl && data.imageUrl.trim()) {
     data.image = data.imageUrl.trim();
   }
