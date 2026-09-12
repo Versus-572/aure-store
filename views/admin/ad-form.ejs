@@ -1,0 +1,143 @@
+<%- include('partials/header', { active: 'ads' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// PROMOTION</span>
+    <h1><%= ad ? 'EDIT AD' : 'NEW AD' %></h1>
+  </div>
+  <a href="/admin/ads" class="btn btn-ghost">← BACK</a>
+</div>
+
+<div class="form-layout">
+  <form method="POST" class="admin-form"
+        action="<%= ad ? '/admin/ads/' + ad.id : '/admin/ads' %>">
+    <div class="f-field">
+      <label for="title">Title *</label>
+      <input id="title" name="title" required value="<%= ad ? ad.title : '' %>" placeholder="SUMMER DROP '26" />
+    </div>
+
+    <div class="f-field">
+      <label for="subtitle">Subtitle</label>
+      <input id="subtitle" name="subtitle" value="<%= ad ? ad.subtitle : '' %>" placeholder="Heavyweight tees, now live" />
+    </div>
+
+    <div class="f-row">
+      <div class="f-field">
+        <label for="placement">Placement</label>
+        <select id="placement" name="placement">
+          <option value="hero" <%= ad && ad.placement === 'hero' ? 'selected' : '' %>>Homepage Hero Banner</option>
+          <option value="banner" <%= ad && ad.placement === 'banner' ? 'selected' : '' %>>Banner Strip</option>
+          <option value="sidebar" <%= ad && ad.placement === 'sidebar' ? 'selected' : '' %>>Sidebar</option>
+          <option value="footer" <%= ad && ad.placement === 'footer' ? 'selected' : '' %>>Footer</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="order">Order (0 = first)</label>
+        <input id="order" name="order" type="number" value="<%= ad ? ad.order : 0 %>" />
+      </div>
+    </div>
+
+    <div class="f-field">
+      <label for="link">Link URL (optional)</label>
+      <input id="link" name="link" value="<%= ad ? ad.link : '' %>" placeholder="https://..." />
+    </div>
+
+    <div class="f-field">
+      <label>
+        <input type="checkbox" name="active" <%= !ad || ad.active ? 'checked' : '' %> />
+        <span class="inline-lbl">Active (shown on site)</span>
+      </label>
+    </div>
+
+    <div class="f-field">
+      <label>Ad Image / Video</label>
+      <input type="hidden" id="mediaUrl" name="mediaUrl" value="<%= ad ? ad.image : '' %>" />
+
+      <div id="media-preview" style="margin-bottom:12px">
+        <% if (ad && ad.image) { %>
+          <% if (/\.(mp4|webm|ogg)$/i.test(ad.image)) { %>
+            <video src="<%= ad.image %>" controls style="max-width:300px;border-radius:8px;border:1px solid var(--line)"></video>
+          <% } else { %>
+            <img src="<%= ad.image %>" style="max-width:300px;border-radius:8px;border:1px solid var(--line)" />
+          <% } %>
+        <% } %>
+      </div>
+
+      <div class="upload-area" id="dropZone">
+        <div class="upload-icon">⬆</div>
+        <p>Drag & drop a file or click to browse</p>
+        <small>JPG, PNG, WEBP, MP4 — MAX 10 MB</small>
+        <input type="file" id="fileUpload" accept="image/*,video/mp4,video/webm" style="display:none" />
+      </div>
+      <div id="uploadStatus" class="upload-status"></div>
+    </div>
+
+    <div class="f-field">
+      <label for="imageUrl">Or paste an image URL</label>
+      <div class="f-row">
+        <input id="imageUrl" value="" placeholder="https://example.com/photo.jpg" />
+        <button type="button" id="useUrlBtn" class="btn btn-ghost">USE URL →</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">SAVE AD →</button>
+      <a href="/admin/ads" class="btn btn-ghost">CANCEL</a>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  var dropZone = document.getElementById('dropZone');
+  var fileInput = document.getElementById('fileUpload');
+  var mediaUrl = document.getElementById('mediaUrl');
+  var preview = document.getElementById('media-preview');
+  var status = document.getElementById('uploadStatus');
+
+  dropZone.addEventListener('click', function() { fileInput.click(); });
+  dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault(); dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) { handleFile(e.dataTransfer.files[0]); }
+  });
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+
+  function handleFile(file) {
+    var fd = new FormData();
+    fd.append('file', file);
+    status.className = 'upload-status loading';
+    status.textContent = 'Uploading to Cloudinary...';
+    fetch('/admin/upload', { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.error) { status.className = 'upload-status err'; status.textContent = d.error; return; }
+        mediaUrl.value = d.url;
+        var isVideo = /\.(mp4|webm|ogg)$/i.test(d.url);
+        preview.innerHTML = isVideo
+          ? '<video src="' + d.url + '" controls style="max-width:300px;border-radius:8px;border:1px solid var(--line)"></video>'
+          : '<img src="' + d.url + '" style="max-width:300px;border-radius:8px;border:1px solid var(--line)" />';
+        status.className = 'upload-status ok';
+        status.textContent = 'Uploaded!';
+      })
+      .catch(function(e) { status.className = 'upload-status err'; status.textContent = 'Failed: ' + e.message; });
+  }
+
+  document.getElementById('useUrlBtn').addEventListener('click', function() {
+    var url = document.getElementById('imageUrl').value.trim();
+    if (!url) return alert('Paste a URL first');
+    mediaUrl.value = url;
+    var isVideo = /\.(mp4|webm|ogg)$/i.test(url);
+    preview.innerHTML = isVideo
+      ? '<video src="' + url + '" controls style="max-width:300px;border-radius:8px;border:1px solid var(--line)"></video>'
+      : '<img src="' + url + '" style="max-width:300px;border-radius:8px;border:1px solid var(--line)" />';
+    status.className = 'upload-status ok';
+    status.textContent = 'URL set!';
+  });
+})();
+</script>
+
+<%- include('partials/footer') %>

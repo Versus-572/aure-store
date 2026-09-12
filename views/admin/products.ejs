@@ -1,0 +1,61 @@
+<%- include('partials/header', { active: 'products' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// CATALOG</span>
+    <h1>PRODUCTS</h1>
+  </div>
+  <a href="/admin/products/new" class="btn btn-primary">+ NEW PRODUCT</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Line</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (products.length === 0) { %>
+        <tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:40px">No products yet</td></tr>
+      <% } else { %>
+        <% products.forEach(function(p) { %>
+          <tr>
+            <td style="display:flex;align-items:center;gap:12px">
+              <% if (p.image) { %>
+                <img src="<%= p.image %>" style="width:40px;height:40px;border-radius:6px;object-fit:cover;background:var(--bg3)" />
+              <% } else { %>
+                <div style="width:40px;height:40px;border-radius:6px;background:var(--bg3)"></div>
+              <% } %>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem"><%= p.name %></div>
+                <% if (p.tag) { %>
+                  <span style="font-family:var(--mono);font-size:0.6rem;color:var(--lime);letter-spacing:1px"><%= p.tag %></span>
+                <% } %>
+              </div>
+            </td>
+            <td><span class="badge badge-<%= p.line === 'luxury' ? 'processing' : 'pending' %>"><%= p.line %></span></td>
+            <td style="color:var(--ink2)"><%= p.category %></td>
+            <td class="amount">₹<%= Number(p.price).toLocaleString('en-IN') %></td>
+            <td><%= p.stock %></td>
+            <td>
+              <div style="display:flex;gap:8px">
+                <a href="/admin/products/<%= p.id %>/edit" class="btn btn-ghost btn-sm">Edit</a>
+                <form method="POST" action="/admin/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?')">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

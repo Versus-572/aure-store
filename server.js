@@ -2,8 +2,16 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const multer = require('multer');
 const Razorpay = require('razorpay');
+const cloudinary = require('cloudinary').v2;
 const store = require('./lib/store');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +42,22 @@ app.use(
     cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }
   })
 );
+
+/* ---------------- Uploads (memory → Cloudinary) ---------------- */
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = file.mimetype && (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/'));
+    cb(ok ? null : new Error('Only image and video files allowed'), ok);
+  }
+});
+
+/* ---------------- Admin auth ---------------- */
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.admin) return next();
+  res.redirect('/admin/login');
+}
 
 /* ---------------- Locals ---------------- */
 app.use((req, res, next) => {
@@ -234,6 +258,159 @@ app.get('/order/success/:id', (req, res) => {
   res.render('order-success', { title: 'Order Confirmed — AURE', order, inr });
 });
 
+/* ============================================================
+   CLOUDINARY UPLOAD ENDPOINT
+============================================================ */
+app.post('/admin/upload', requireAdmin, upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const b64 = req.file.buffer.toString('base64');
+  const dataUri = 'data:' + req.file.mimetype + ';base64,' + b64;
+  const isVideo = req.file.mimetype.startsWith('video/');
+  const folder = isVideo ? 'aure-store/videos' : 'aure-store';
+  cloudinary.uploader.upload(dataUri, { folder, resource_type: isVideo ? 'video' : 'image' }, (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ url: result.secure_url });
+  });
+});
+
+/* ============================================================
+   ADMIN ROUTES
+============================================================ */
+app.get('/admin/login', (req, res) => {
+  if (req.session.admin) return res.redirect('/admin');
+  res.render('admin/login', { title: 'Admin Login — AURE', error: null });
+});
+
+app.post('/admin/login', (req, res) => {
+  const pw = process.env.ADMIN_PASSWORD || 'aureadmin';
+  if (req.body.password === pw) {
+    req.session.admin = true;
+    return res.redirect('/admin');
+  }
+  res.status(401).render('admin/login', { title: 'Admin Login — AURE', error: 'Incorrect password.' });
+});
+
+app.post('/admin/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/admin/login'));
+});
+
+app.get('/admin', requireAdmin, (req, res) => {
+  const orders = store.getOrders();
+  const products = store.getProducts();
+  const revenue = orders.filter((o) => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0);
+  const pending = orders.filter((o) => o.status === 'pending').length;
+  res.render('admin/dashboard', {
+    title: 'Dashboard — AURE Admin',
+    stats: { products: products.length, orders: orders.length, pending, revenue: inr(revenue) },
+    recentOrders: [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5),
+    inr
+  });
+});
+
+/* ------ Products ------ */
+app.get('/admin/products', requireAdmin, (req, res) => {
+  res.render('admin/products', { title: 'Products — AURE Admin', products: store.getProducts() });
+});
+
+app.get('/admin/products/new', requireAdmin, (req, res) => {
+  res.render('admin/product-form', { title: 'New Product — AURE Admin', product: null });
+});
+
+app.get('/admin/products/:id/edit', requireAdmin, (req, res) => {
+  const product = store.getProduct(req.params.id);
+  if (!product) return res.redirect('/admin/products');
+  res.render('admin/product-form', { title: 'Edit Product — AURE Admin', product });
+});
+
+app.post('/admin/products', requireAdmin, (req, res) => {
+  const data = req.body;
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
+  store.addProduct(normalizeProductBody(data));
+  res.redirect('/admin/products');
+});
+
+app.post('/admin/products/:id', requireAdmin, (req, res) => {
+  const data = req.body;
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
+  if (req.body.removeImage === '1') data.image = '';
+  store.updateProduct(req.params.id, normalizeProductBody(data));
+  res.redirect('/admin/products');
+});
+
+function normalizeProductBody(data) {
+  const sizes = Array.isArray(data.sizes) ? data.sizes : [data.sizes].filter(Boolean);
+  return {
+    name: data.name,
+    line: data.line,
+    category: data.category,
+    price: data.price,
+    sizes,
+    stock: data.stock,
+    description: data.description,
+    image: data.image,
+    featured: data.featured,
+    tag: data.tag
+  };
+}
+
+app.post('/admin/products/:id/delete', requireAdmin, (req, res) => {
+  store.deleteProduct(req.params.id);
+  res.redirect('/admin/products');
+});
+
+/* ------ Ads ------ */
+app.get('/admin/ads', requireAdmin, (req, res) => {
+  res.render('admin/ads', { title: 'Ads & Banners — AURE Admin', ads: store.getAds() });
+});
+
+app.get('/admin/ads/new', requireAdmin, (req, res) => {
+  res.render('admin/ad-form', { title: 'New Ad — AURE Admin', ad: null });
+});
+
+app.get('/admin/ads/:id/edit', requireAdmin, (req, res) => {
+  const ad = store.getAds().find((a) => a.id === req.params.id);
+  if (!ad) return res.redirect('/admin/ads');
+  res.render('admin/ad-form', { title: 'Edit Ad — AURE Admin', ad });
+});
+
+app.post('/admin/ads', requireAdmin, (req, res) => {
+  const data = req.body;
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
+  store.addAd(data);
+  res.redirect('/admin/ads');
+});
+
+app.post('/admin/ads/:id', requireAdmin, (req, res) => {
+  const data = req.body;
+  if (data.mediaUrl && data.mediaUrl.trim()) data.image = data.mediaUrl.trim();
+  store.updateAd(req.params.id, data);
+  res.redirect('/admin/ads');
+});
+
+app.post('/admin/ads/:id/delete', requireAdmin, (req, res) => {
+  store.deleteAd(req.params.id);
+  res.redirect('/admin/ads');
+});
+
+/* ------ Orders ------ */
+app.get('/admin/orders', requireAdmin, (req, res) => {
+  const orders = [...store.getOrders()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const status = req.query.status || '';
+  const filtered = status ? orders.filter((o) => o.status === status) : orders;
+  res.render('admin/orders', { title: 'Orders — AURE Admin', orders: filtered, status, inr });
+});
+
+app.get('/admin/orders/:id', requireAdmin, (req, res) => {
+  const order = store.getOrder(req.params.id);
+  if (!order) return res.redirect('/admin/orders');
+  res.render('admin/order', { title: 'Order ' + order.id + ' — AURE Admin', order, inr });
+});
+
+app.post('/admin/orders/:id/status', requireAdmin, (req, res) => {
+  store.updateOrderStatus(req.params.id, req.body.status);
+  res.redirect('/admin/orders/' + req.params.id);
+});
+
 /* ---------------- Misc ---------------- */
 app.get('/500', (req, res) => {
   res.status(500).send('Server error');
@@ -260,6 +437,7 @@ app.listen(PORT, () => {
   console.log('  ⬤ AURE streetwear store running');
   console.log('  ────────────────────────────────');
   console.log('  Store     →  http://localhost:' + PORT);
+  console.log('  Admin     →  http://localhost:' + PORT + '/admin');
   console.log('  Payments  →  ' + (rzpEnabled ? 'RAZORPAY LIVE' : 'DEMO MODE (set RAZORPAY_KEY_ID/SECRET in .env)'));
   console.log('');
 });

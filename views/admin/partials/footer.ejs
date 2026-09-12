@@ -1,0 +1,19 @@
+  </div>
+</main>
+
+<script>
+document.querySelectorAll('.hamburger').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('open');
+  });
+});
+document.addEventListener('click', function(e) {
+  var sidebar = document.querySelector('.sidebar');
+  var hamburger = document.querySelector('.hamburger');
+  if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== hamburger) {
+    sidebar.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

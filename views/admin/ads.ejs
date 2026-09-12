@@ -1,0 +1,52 @@
+<%- include('partials/header', { active: 'ads' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// PROMOTION</span>
+    <h1>ADS & BANNERS</h1>
+  </div>
+  <a href="/admin/ads/new" class="btn btn-primary">+ NEW AD</a>
+</div>
+
+<% if (ads.length === 0) { %>
+  <div class="table-wrap">
+    <div style="text-align:center;color:var(--ink3);padding:60px 24px">
+      <p style="margin-bottom:12px">No ads or banners yet</p>
+      <a href="/admin/ads/new" class="btn btn-primary">+ CREATE YOUR FIRST AD</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="ad-grid">
+    <% ads.forEach(function(ad) { %>
+      <div class="ad-card">
+        <% if (ad.image) { %>
+          <% if (/\.(mp4|webm|ogg)$/i.test(ad.image)) { %>
+            <video class="ad-card-img" src="<%= ad.image %>" muted loop></video>
+          <% } else { %>
+            <img class="ad-card-img" src="<%= ad.image %>" alt="<%= ad.title %>" />
+          <% } %>
+        <% } else { %>
+          <div class="ad-card-img" style="display:flex;align-items:center;justify-content:center;color:var(--ink3)">No image</div>
+        <% } %>
+        <div class="ad-card-body">
+          <div class="ad-card-title"><%= ad.title %></div>
+          <% if (ad.subtitle) { %>
+            <div style="font-size:0.8rem;color:var(--ink2)"><%= ad.subtitle %></div>
+          <% } %>
+          <div class="ad-card-meta">
+            <span><%= ad.placement %></span>
+            <span><%= ad.active ? 'ACTIVE' : 'INACTIVE' %></span>
+          </div>
+        </div>
+        <div class="ad-card-actions">
+          <a href="/admin/ads/<%= ad.id %>/edit" class="btn btn-ghost btn-sm">Edit</a>
+          <form method="POST" action="/admin/ads/<%= ad.id %>/delete" onsubmit="return confirm('Delete this ad?')">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,71 @@
+<%- include('partials/header', { active: 'dashboard' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// CONTROL ROOM</span>
+    <h1>DASHBOARD</h1>
+  </div>
+  <a href="/admin/products/new" class="btn btn-primary">+ NEW PRODUCT</a>
+</div>
+
+<div class="metrics">
+  <div class="metric">
+    <span class="metric-label">Products</span>
+    <span class="metric-value"><%= stats.products %></span>
+    <a href="/admin/products" class="metric-link">manage →</a>
+  </div>
+  <div class="metric">
+    <span class="metric-label">Orders</span>
+    <span class="metric-value"><%= stats.orders %></span>
+    <a href="/admin/orders" class="metric-link">view →</a>
+  </div>
+  <div class="metric">
+    <span class="metric-label">Pending</span>
+    <span class="metric-value"><%= stats.pending %></span>
+    <a href="/admin/orders?status=pending" class="metric-link">review →</a>
+  </div>
+  <div class="metric">
+    <span class="metric-label">Revenue</span>
+    <span class="metric-value lime"><%= stats.revenue %></span>
+    <a href="/admin/orders" class="metric-link">all time →</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <div class="table-head">
+    <h2>RECENT ORDERS</h2>
+    <a href="/admin/orders">ALL →</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>When</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (recentOrders.length === 0) { %>
+        <tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:40px">No orders yet</td></tr>
+      <% } else { %>
+        <% recentOrders.forEach(function(o) { %>
+          <tr>
+            <td class="order-id"><a href="/admin/orders/<%= o.id %>"><%= o.id.slice(0, 8) %></a></td>
+            <td><%= o.name %></td>
+            <td class="amount"><%= inr(o.total) %></td>
+            <td><%= o.paymentMethod || '—' %></td>
+            <td>
+              <span class="badge badge-<%= o.status %>"><%= o.status %></span>
+            </td>
+            <td style="color:var(--ink3);font-size:0.8rem"><%= new Date(o.createdAt).toLocaleDateString('en-IN') %></td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

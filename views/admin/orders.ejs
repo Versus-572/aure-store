@@ -1,0 +1,51 @@
+<%- include('partials/header', { active: 'orders' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// FULFILLMENT</span>
+    <h1>ORDERS</h1>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="/admin/orders" class="btn btn-ghost btn-sm <%= !status ? 'active' : '' %>" style="<%= !status ? 'border-color:var(--lime);color:var(--lime)' : '' %>">ALL</a>
+    <a href="/admin/orders?status=pending" class="btn btn-ghost btn-sm" style="<%= status === 'pending' ? 'border-color:var(--amber);color:var(--amber)' : '' %>">PENDING</a>
+    <a href="/admin/orders?status=fulfilled" class="btn btn-ghost btn-sm" style="<%= status === 'fulfilled' ? 'border-color:var(--green);color:var(--green)' : '' %>">FULFILLED</a>
+    <a href="/admin/orders?status=cancelled" class="btn btn-ghost btn-sm" style="<%= status === 'cancelled' ? 'border-color:var(--red);color:var(--red)' : '' %>">CANCELLED</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (orders.length === 0) { %>
+        <tr><td colspan="8" style="text-align:center;color:var(--ink3);padding:40px">No orders found</td></tr>
+      <% } else { %>
+        <% orders.forEach(function(o) { %>
+          <tr>
+            <td class="order-id"><%= o.id.slice(0, 8) %></td>
+            <td><%= o.name %><br /><span style="font-size:0.7rem;color:var(--ink3)"><%= o.email %></span></td>
+            <td><%= o.items.length %></td>
+            <td class="amount"><%= inr(o.total) %></td>
+            <td style="font-size:0.8rem"><%= o.paymentMethod || '—' %></td>
+            <td><span class="badge badge-<%= o.status %>"><%= o.status %></span></td>
+            <td style="color:var(--ink3);font-size:0.8rem"><%= new Date(o.createdAt).toLocaleDateString('en-IN') %></td>
+            <td><a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">View</a></td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

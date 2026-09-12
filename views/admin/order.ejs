@@ -1,0 +1,79 @@
+<%- include('partials/header', { active: 'orders' }) %>
+
+<div class="page-top">
+  <div>
+    <span class="kicker">// ORDER</span>
+    <h1><%= order.id.slice(0, 8) %></h1>
+  </div>
+  <a href="/admin/orders" class="btn btn-ghost">← BACK</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px">
+  <div>
+    <div class="table-wrap" style="margin-bottom:24px">
+      <div class="table-head"><h2>ITEMS</h2></div>
+      <table>
+        <thead>
+          <tr><th>Product</th><th>Size</th><th>Qty</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          <% order.items.forEach(function(item) { %>
+            <tr>
+              <td><%= item.product %></td>
+              <td><%= item.size || '—' %></td>
+              <td><%= item.qty %></td>
+              <td class="amount"><%= inr(item.price * item.qty) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-head"><h2>UPDATE STATUS</h2></div>
+      <div style="padding:20px 24px">
+        <form method="POST" action="/admin/orders/<%= order.id %>/status" style="display:flex;gap:12px;align-items:flex-end">
+          <div class="f-field" style="flex:1">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+              <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+              <option value="fulfilled" <%= order.status === 'fulfilled' ? 'selected' : '' %>>Fulfilled</option>
+              <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">UPDATE</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="table-wrap" style="margin-bottom:24px">
+      <div class="table-head"><h2>CUSTOMER</h2></div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;font-size:0.85rem">
+        <div><span style="color:var(--ink3)">Name:</span> <%= order.name %></div>
+        <div><span style="color:var(--ink3)">Email:</span> <%= order.email %></div>
+        <div><span style="color:var(--ink3)">Phone:</span> <%= order.phone %></div>
+        <div><span style="color:var(--ink3)">Address:</span> <%= order.address %>, <%= order.city %> — <%= order.pincode %></div>
+        <% if (order.notes) { %>
+          <div><span style="color:var(--ink3)">Notes:</span> <%= order.notes %></div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-head"><h2>PAYMENT</h2></div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;font-size:0.85rem">
+        <div><span style="color:var(--ink3)">Method:</span> <%= order.paymentMethod || '—' %></div>
+        <div><span style="color:var(--ink3)">Subtotal:</span> <%= inr(order.subtotal) %></div>
+        <div><span style="color:var(--ink3)">Shipping:</span> <%= inr(order.shipping) %></div>
+        <div style="font-weight:700;font-size:1.1rem"><span style="color:var(--ink3)">Total:</span> <%= inr(order.total) %></div>
+        <div><span style="color:var(--ink3)">Status:</span> <span class="badge badge-<%= order.status %>"><%= order.status %></span></div>
+        <div style="font-size:0.75rem;color:var(--ink3)"><%= new Date(order.createdAt).toLocaleString('en-IN') %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
