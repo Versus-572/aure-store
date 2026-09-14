@@ -1,38 +1,58 @@
+<%
+  const f = (typeof footer !== 'undefined' && footer) ? footer : {
+    brandTagline: 'Premium streetwear, made for the ones who move different.',
+    email: 'hello@aure.store',
+    country: 'India',
+    currency: 'INR',
+    copyright: '© 2026 AURE — MADE IN INDIA. ALL PRICES IN INR.',
+    shopLinks: [
+      { label: 'All', url: '/shop' },
+      { label: 'Tees', url: '/shop?category=Tees' },
+      { label: 'Hoodies', url: '/shop?category=Hoodies' },
+      { label: 'Jackets', url: '/shop?category=Jackets' }
+    ],
+    helpLinks: [
+      { label: 'Cart', url: '/cart' },
+      { label: 'Checkout', url: '/checkout' },
+      { label: 'Admin', url: '/admin/login' }
+    ]
+  };
+  const marqueeText = (typeof marquee !== 'undefined' && marquee) ? marquee : 'STREETWEAR • //LIMITED DROPS • AURE • 2026';
+%>
 </main>
 
   <footer class="footer">
     <div class="footer-marquee">
       <div class="marquee-row">
         <% for (let i = 0; i < 4; i++) { %>
-          <span>STREETWEAR&nbsp;•&nbsp;//LIMITED DROPS&nbsp;•&nbsp;AURE&nbsp;•&nbsp;2026&nbsp;•&nbsp;</span>
+          <span><%= marqueeText %>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <% } %>
       </div>
     </div>
     <div class="footer-grid">
       <div class="f-brand">
         <div class="f-logo">AURE.</div>
-        <p>Premium streetwear, made for the ones who move different.</p>
+        <p><%= f.brandTagline %></p>
       </div>
       <div class="f-col">
         <h4>Shop</h4>
-        <a href="/shop">All</a>
-        <a href="/shop?category=Tees">Tees</a>
-        <a href="/shop?category=Hoodies">Hoodies</a>
-        <a href="/shop?category=Jackets">Jackets</a>
+        <% f.shopLinks.forEach(function(link) { %>
+          <a href="<%= link.url %>"><%= link.label %></a>
+        <% }) %>
       </div>
       <div class="f-col">
         <h4>Help</h4>
-        <a href="/cart">Cart</a>
-        <a href="/checkout">Checkout</a>
-        <a href="/admin/login">Admin</a>
+        <% f.helpLinks.forEach(function(link) { %>
+          <a href="<%= link.url %>"><%= link.label %></a>
+        <% }) %>
       </div>
       <div class="f-col">
         <h4>Contact</h4>
-        <a href="mailto:hello@aure.store">hello@aure.store</a>
-        <span>India 🇮🇳 · INR</span>
+        <a href="mailto:<%= f.email %>"><%= f.email %></a>
+        <span><%= f.country %> 🇮🇳 · <%= f.currency %></span>
       </div>
     </div>
-    <div class="f-bottom">© 2026 AURE — MADE IN INDIA. ALL PRICES IN INR.</div>
+    <div class="f-bottom"><%= f.copyright %></div>
   </footer>
 
   <script src="/js/main.js"></script>

@@ -61,10 +61,13 @@ function requireAdmin(req, res, next) {
 
 /* ---------------- Locals ---------------- */
 app.use((req, res, next) => {
+  const settings = store.getSettings();
   res.locals.cartCount = (req.session.cart || []).reduce((s, i) => s + (i.qty || 0), 0);
   res.locals.path = req.path;
   res.locals.rzpKeyId = rzpEnabled ? process.env.RAZORPAY_KEY_ID : null;
   res.locals.rzpEnabled = rzpEnabled;
+  res.locals.footer = settings.footer;
+  res.locals.marquee = settings.marquee;
   next();
 });
 
@@ -409,6 +412,34 @@ app.get('/admin/orders/:id', requireAdmin, (req, res) => {
 app.post('/admin/orders/:id/status', requireAdmin, (req, res) => {
   store.updateOrderStatus(req.params.id, req.body.status);
   res.redirect('/admin/orders/' + req.params.id);
+});
+
+/* ------ Settings ------ */
+app.get('/admin/settings', requireAdmin, (req, res) => {
+  res.render('admin/settings', { title: 'Settings — AURE Admin', settings: store.getSettings() });
+});
+
+app.post('/admin/settings', requireAdmin, (req, res) => {
+  const data = {
+    marquee: req.body.marquee,
+    footer: {
+      brandTagline: req.body.footer.brandTagline,
+      email: req.body.footer.email,
+      country: req.body.footer.country,
+      currency: req.body.footer.currency,
+      copyright: req.body.footer.copyright,
+      shopLinks: (req.body.footer.shopLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
+        var parts = line.split('|').map(function(s) { return s.trim(); });
+        return { label: parts[0] || '', url: parts[1] || '/' };
+      }),
+      helpLinks: (req.body.footer.helpLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
+        var parts = line.split('|').map(function(s) { return s.trim(); });
+        return { label: parts[0] || '', url: parts[1] || '/' };
+      })
+    }
+  };
+  store.updateSettings(data);
+  res.redirect('/admin/settings');
 });
 
 /* ---------------- Misc ---------------- */
