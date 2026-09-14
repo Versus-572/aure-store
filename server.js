@@ -420,19 +420,20 @@ app.get('/admin/settings', requireAdmin, (req, res) => {
 });
 
 app.post('/admin/settings', requireAdmin, (req, res) => {
+  const fb = req.body.footer || {};
   const data = {
-    marquee: req.body.marquee,
+    marquee: req.body.marquee || '',
     footer: {
-      brandTagline: req.body.footer.brandTagline,
-      email: req.body.footer.email,
-      country: req.body.footer.country,
-      currency: req.body.footer.currency,
-      copyright: req.body.footer.copyright,
-      shopLinks: (req.body.footer.shopLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
+      brandTagline: fb.brandTagline || '',
+      email: fb.email || '',
+      country: fb.country || '',
+      currency: fb.currency || '',
+      copyright: fb.copyright || '',
+      shopLinks: (fb.shopLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
         var parts = line.split('|').map(function(s) { return s.trim(); });
         return { label: parts[0] || '', url: parts[1] || '/' };
       }),
-      helpLinks: (req.body.footer.helpLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
+      helpLinks: (fb.helpLinksRaw || '').split('\n').filter(Boolean).map(function(line) {
         var parts = line.split('|').map(function(s) { return s.trim(); });
         return { label: parts[0] || '', url: parts[1] || '/' };
       })
