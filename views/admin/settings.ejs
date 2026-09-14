@@ -1,4 +1,8 @@
 <%- include('partials/header', { active: 'settings' }) %>
+<%
+  const s = settings || {};
+  const sf = (s.footer) ? s.footer : {};
+%>
 
 <div class="page-top">
   <div>
@@ -12,48 +16,48 @@
 
     <div class="f-field">
       <label>Marquee Text</label>
-      <input name="marquee" value="<%= settings.marquee %>" placeholder="STREETWEAR • //LIMITED DROPS • AURE • 2026" />
+      <input name="marquee" value="<%= s.marquee || '' %>" placeholder="STREETWEAR • //LIMITED DROPS • AURE • 2026" />
     </div>
 
     <h2 style="font-size:1rem;margin-top:24px;color:var(--lime);font-family:var(--mono);letter-spacing:2px">// FOOTER</h2>
 
     <div class="f-field">
       <label for="brandTagline">Brand Tagline</label>
-      <input id="brandTagline" name="footer.brandTagline" value="<%= settings.footer.brandTagline %>" />
+      <input id="brandTagline" name="brandTagline" value="<%= sf.brandTagline || '' %>" />
     </div>
 
     <div class="f-row">
       <div class="f-field">
         <label for="email">Contact Email</label>
-        <input id="email" name="footer.email" type="email" value="<%= settings.footer.email %>" />
+        <input id="email" name="email" type="email" value="<%= sf.email || '' %>" />
       </div>
       <div class="f-field">
         <label for="country">Country</label>
-        <input id="country" name="footer.country" value="<%= settings.footer.country %>" />
+        <input id="country" name="country" value="<%= sf.country || '' %>" />
       </div>
     </div>
 
     <div class="f-row">
       <div class="f-field">
         <label for="currency">Currency</label>
-        <input id="currency" name="footer.currency" value="<%= settings.footer.currency %>" />
+        <input id="currency" name="currency" value="<%= sf.currency || '' %>" />
       </div>
       <div class="f-field">
         <label for="copyright">Copyright Text</label>
-        <input id="copyright" name="footer.copyright" value="<%= settings.footer.copyright %>" />
+        <input id="copyright" name="copyright" value="<%= sf.copyright || '' %>" />
       </div>
     </div>
 
     <div class="f-field">
       <label>Shop Links (one per line: label | url)</label>
-      <textarea name="footer.shopLinksRaw" rows="5"><% settings.footer.shopLinks.forEach(function(l) { %><%= l.label %> | <%= l.url %>
+      <textarea name="shopLinksRaw" rows="5"><% (sf.shopLinks || []).forEach(function(l) { %><%= l.label %> | <%= l.url %>
 <% }) %></textarea>
       <div style="font-family:var(--mono);font-size:0.65rem;color:var(--ink3);margin-top:4px">Format: Label | /url — e.g. Hoodies | /shop?category=Hoodies</div>
     </div>
 
     <div class="f-field">
       <label>Help Links (one per line: label | url)</label>
-      <textarea name="footer.helpLinksRaw" rows="4"><% settings.footer.helpLinks.forEach(function(l) { %><%= l.label %> | <%= l.url %>
+      <textarea name="helpLinksRaw" rows="4"><% (sf.helpLinks || []).forEach(function(l) { %><%= l.label %> | <%= l.url %>
 <% }) %></textarea>
       <div style="font-family:var(--mono);font-size:0.65rem;color:var(--ink3);margin-top:4px">Format: Label | /url — e.g. Size Guide | /size-guide</div>
     </div>
